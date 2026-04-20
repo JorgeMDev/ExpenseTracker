@@ -2,12 +2,14 @@ const router = require('express').Router();
 const { body } = require('express-validator');
 const auth = require('../middleware/auth');
 const ctrl = require('../controllers/expenseController');
+const importCtrl = require('../controllers/importController');
 
 router.use(auth);
 
 router.get('/', ctrl.getAll);
 router.get('/summary', ctrl.getSummary);
 router.post('/analyze', ctrl.analyze);
+router.post('/import', importCtrl.importCSV);
 router.get('/:id', ctrl.getOne);
 
 router.post('/', [

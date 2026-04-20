@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusIcon, MagnifyingGlassIcon, FunnelIcon,
   PencilSquareIcon, TrashIcon, SparklesIcon, CreditCardIcon,
-  ArrowDownTrayIcon,
+  ArrowDownTrayIcon, ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 import { useExpenses } from '@/context/ExpenseContext';
 import { formatCurrency, formatDate, TYPE_LABELS } from '@/lib/utils';
 import { exportTransactionsCSV } from '@/lib/exportCsv';
 import ExpenseModal from '@/components/expenses/ExpenseModal';
+import CSVImportModal from '@/components/expenses/CSVImportModal';
 
 export default function ExpensesPage() {
   const { expenses, categories, loading, total, fetchExpenses, fetchCategories, deleteExpense } = useExpenses();
@@ -17,6 +18,7 @@ export default function ExpensesPage() {
   const [editingExpense, setEditingExpense] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [filters, setFilters] = useState({ type: '', category_id: '', is_deductible: '', search: '', limit: 50, offset: 0 });
 
   useEffect(() => { fetchCategories(); }, []);
@@ -75,6 +77,14 @@ export default function ExpensesPage() {
               : <ArrowDownTrayIcon className="w-4 h-4" />
             }
             <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'CSV'}</span>
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setImportModalOpen(true)}
+            className="btn-secondary flex items-center gap-2 text-sm"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">Import CSV</span>
           </motion.button>
           <motion.button whileTap={{ scale: 0.97 }} onClick={handleAdd} className="btn-primary flex items-center gap-2 text-sm">
             <PlusIcon className="w-4 h-4" />
@@ -291,6 +301,7 @@ export default function ExpensesPage() {
       )}
 
       <ExpenseModal isOpen={modalOpen} onClose={handleModalClose} expense={editingExpense} />
+      <CSVImportModal isOpen={importModalOpen} onClose={() => { setImportModalOpen(false); fetchExpenses(filters); }} />
     </div>
   );
 }

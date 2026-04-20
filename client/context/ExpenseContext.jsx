@@ -68,11 +68,16 @@ export function ExpenseProvider({ children }) {
     return data.suggestion;
   }, []);
 
+  const importCSV = useCallback(async (transactions) => {
+    const { data } = await api.post('/expenses/import', { transactions });
+    return data;
+  }, []);
+
   return (
     <ExpenseContext.Provider value={{
       expenses, categories, summary, loading, total,
       fetchExpenses, fetchCategories, createExpense, updateExpense, deleteExpense,
-      fetchSummary, analyzeExpense,
+      fetchSummary, analyzeExpense, importCSV,
     }}>
       {children}
     </ExpenseContext.Provider>
