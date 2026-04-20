@@ -9,7 +9,8 @@ import { DocumentArrowDownIcon, SparklesIcon, ReceiptRefundIcon } from '@heroico
 import api from '@/lib/api';
 import { formatCurrency, CHART_COLORS } from '@/lib/utils';
 import StatCard from '@/components/ui/StatCard';
-import { exportTaxReportPDF } from '@/lib/exportPdf';
+import { previewTaxReportPDF } from '@/lib/exportPdf';
+import PDFPreviewModal from '@/components/reports/PDFPreviewModal';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -33,11 +34,15 @@ export default function ReportsPage() {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
 
-  const handleExportPDF = async () => {
+  const handlePreviewPDF = async () => {
     setExporting(true);
     try {
-      exportTaxReportPDF(taxData, reportData, year);
+      const url = previewTaxReportPDF(taxData, reportData, year);
+      setPdfUrl(url);
+      setPreviewOpen(true);
     } finally {
       setExporting(false);
     }
@@ -89,7 +94,7 @@ export default function ReportsPage() {
           </select>
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={handleExportPDF}
+            onClick={handlePreviewPDF}
             disabled={exporting || loading}
             className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50"
           >
@@ -97,7 +102,7 @@ export default function ReportsPage() {
               ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
               : <DocumentArrowDownIcon className="w-4 h-4" />
             }
-            <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'Export PDF'}</span>
+            <span className="hidden sm:inline">{exporting ? 'Generating...' : 'Export PDF'}</span>
           </motion.button>
         </div>
       </motion.div>
@@ -250,6 +255,15 @@ export default function ReportsPage() {
           ))}
         </div>
       </motion.div>
+
+      <PDFPreviewModal
+        isOpen={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        pdfUrl={pdfUrl}
+        taxData={taxData}
+        reportData={reportData}
+        year={year}
+      />
     </div>
   );
 }
