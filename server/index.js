@@ -16,7 +16,14 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? process.env.ALLOWED_ORIGINS?.split(',')
+    ? (origin, cb) => {
+        const allowed = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim());
+        if (!origin || allowed.some(o => origin === o || origin.endsWith('.vercel.app'))) {
+          cb(null, true);
+        } else {
+          cb(new Error('CORS not allowed'));
+        }
+      }
     : 'http://localhost:3000',
   credentials: true,
 }));
