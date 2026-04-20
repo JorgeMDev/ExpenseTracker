@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(psql -U postgres -c \"CREATE DATABASE expensetracker;\")",
+      "Bash(PGPASSWORD=19607061 \"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -c \"CREATE DATABASE expensetracker;\")",
+      "Bash(PGPASSWORD=19607061 \"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d expensetracker -f \"c:/Users/PC/OneDrive/Documents/CODING/ExpenseTracker/server/db/schema.sql\")",
+      "Bash(PGPASSWORD=19607061 \"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d expensetracker -f \"c:/Users/PC/OneDrive/Documents/CODING/ExpenseTracker/server/db/seed.sql\")",
+      "Bash(npm install *)",
+      "Bash(npm audit *)",
+      "Bash(npm run *)",
+      "Bash(echo \"Server starting PID: $!\")",
+      "Bash(echo \"Client starting PID: $!\")",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git add *)"
+    ]
+  }
+}
