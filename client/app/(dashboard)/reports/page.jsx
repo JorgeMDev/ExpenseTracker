@@ -9,6 +9,7 @@ import { DocumentArrowDownIcon, SparklesIcon, ReceiptRefundIcon } from '@heroico
 import api from '@/lib/api';
 import { formatCurrency, CHART_COLORS } from '@/lib/utils';
 import StatCard from '@/components/ui/StatCard';
+import { exportTaxReportPDF } from '@/lib/exportPdf';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -31,6 +32,16 @@ export default function ReportsPage() {
   const [reportData, setReportData] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try {
+      exportTaxReportPDF(taxData, reportData, year);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -76,9 +87,17 @@ export default function ReportsPage() {
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <motion.button whileTap={{ scale: 0.97 }} className="btn-secondary flex items-center gap-2 text-sm">
-            <DocumentArrowDownIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Export PDF</span>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleExportPDF}
+            disabled={exporting || loading}
+            className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50"
+          >
+            {exporting
+              ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+              : <DocumentArrowDownIcon className="w-4 h-4" />
+            }
+            <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'Export PDF'}</span>
           </motion.button>
         </div>
       </motion.div>
