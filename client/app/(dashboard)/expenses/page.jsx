@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusIcon, MagnifyingGlassIcon, FunnelIcon,
   PencilSquareIcon, TrashIcon, SparklesIcon, CreditCardIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { useExpenses } from '@/context/ExpenseContext';
 import { formatCurrency, formatDate, TYPE_LABELS } from '@/lib/utils';
+import { exportTransactionsCSV } from '@/lib/exportCsv';
 import ExpenseModal from '@/components/expenses/ExpenseModal';
 
 export default function ExpensesPage() {
@@ -14,12 +16,27 @@ export default function ExpensesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [filters, setFilters] = useState({ type: '', category_id: '', is_deductible: '', search: '', limit: 50, offset: 0 });
 
   useEffect(() => { fetchCategories(); }, []);
   useEffect(() => { fetchExpenses(filters); }, [filters]);
 
   const handleFilterChange = (key, value) => setFilters(prev => ({ ...prev, [key]: value, offset: 0 }));
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      // Fetch all matching expenses (no pagination limit)
+      const params = new URLSearchParams({ ...filters, limit: 10000, offset: 0 });
+      const { data } = await (await import('@/lib/api')).default.get(`/expenses?${params}`);
+      const date = new Date().toISOString().split('T')[0];
+      exportTransactionsCSV(data.expenses, `transactions-${date}.csv`);
+    } catch {
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const handleDelete = async (id, description) => {
     if (!confirm(`Delete "${description}"?`)) return;
@@ -46,6 +63,18 @@ export default function ExpensesPage() {
           >
             <FunnelIcon className="w-4 h-4" />
             <span className="hidden sm:inline">Filters</span>
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleExportCSV}
+            disabled={exporting || expenses.length === 0}
+            className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-40"
+          >
+            {exporting
+              ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+              : <ArrowDownTrayIcon className="w-4 h-4" />
+            }
+            <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'CSV'}</span>
           </motion.button>
           <motion.button whileTap={{ scale: 0.97 }} onClick={handleAdd} className="btn-primary flex items-center gap-2 text-sm">
             <PlusIcon className="w-4 h-4" />
