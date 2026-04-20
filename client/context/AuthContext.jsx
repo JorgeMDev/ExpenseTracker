@@ -11,13 +11,26 @@ export function AuthProvider({ children }) {
 
   const loadUser = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
-    if (!token) { setLoading(false); return; }
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!token && !refreshToken) { setLoading(false); return; }
     try {
       const { data } = await api.get('/auth/me');
       setUser(data.user);
     } catch {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // accessToken expired — try refresh before giving up
+      if (refreshToken) {
+        try {
+          const { data: refreshData } = await api.post('/auth/refresh', { refreshToken });
+          localStorage.setItem('accessToken', refreshData.accessToken);
+          const { data } = await api.get('/auth/me');
+          setUser(data.user);
+        } catch {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
+      } else {
+        localStorage.removeItem('accessToken');
+      }
     } finally {
       setLoading(false);
     }
