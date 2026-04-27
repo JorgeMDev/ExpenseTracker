@@ -26,7 +26,8 @@ module.exports = {
         deductible: '#a78bfa',
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+        sans: ['Jost', 'ui-sans-serif', 'system-ui'],
+        display: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',

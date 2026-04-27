@@ -15,7 +15,16 @@ const reportController = {
         Expense.getTopMerchants(req.user.id, from, to, 5),
       ]);
 
-      res.json({ summary, byCategory, monthlyTrend, topMerchants, period: { from, to } });
+      res.json({
+        summary: {
+          ...summary,
+          net_cash_flow: parseFloat(summary.total_income || 0) - parseFloat(summary.total_amount || 0),
+        },
+        byCategory,
+        monthlyTrend,
+        topMerchants,
+        period: { from, to },
+      });
     } catch (err) {
       next(err);
     }

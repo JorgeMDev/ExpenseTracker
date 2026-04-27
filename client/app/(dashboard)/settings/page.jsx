@@ -52,8 +52,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-5 lg:space-y-8">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-xl lg:text-2xl font-bold text-slate-100">Settings</h1>
-        <p className="text-slate-400 mt-1">Manage your account and preferences</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-slate-100 tracking-tight" style={{ fontFamily: "'Cormorant Garamond', sans-serif" }}>Settings</h1>
+        <p className="text-slate-500 mt-0.5 text-xs tracking-widest uppercase">Account & preferences</p>
       </motion.div>
 
       {/* Profile */}

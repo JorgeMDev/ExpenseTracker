@@ -1,8 +1,26 @@
 const db = require('../config/db');
 const categoryService = require('../services/categoryService');
 const taxService = require('../services/taxService');
+const { parseBofAPDF } = require('../services/pdfParser');
 
 module.exports = {
+  async parsePDF(req, res, next) {
+    try {
+      if (!req.file) {
+        return res.status(422).json({ error: 'PDF_001', message: 'No PDF file uploaded' });
+      }
+      const transactions = await parseBofAPDF(req.file.buffer);
+      res.json({ transactions });
+    } catch (err) {
+      if (err.message?.includes('No transactions found')) {
+        return res.status(422).json({ error: 'PDF_002', message: err.message });
+      }
+      console.error('[parsePDF]', err.message);
+      next(err);
+    }
+  },
+
+
   async importCSV(req, res, next) {
     try {
       const { transactions } = req.body;
@@ -37,6 +55,8 @@ module.exports = {
         );
         const category_id = catRows[0]?.id || null;
 
+        const isIncome = Boolean(tx.is_income);
+
         const expenseData = {
           transaction_id: transactionId,
           date: tx.date,
@@ -45,18 +65,20 @@ module.exports = {
           description: tx.description,
           merchant_name: tx.merchant_name || null,
           type: tx.type || 'personal',
-          source: 'csv',
+          source: 'import',
+          is_income: isIncome,
           category_id,
         };
 
-        const enriched = taxService.analyze(expenseData);
+        // Income rows are not tax-deductible — skip analysis
+        const enriched = isIncome ? { ...expenseData, is_deductible: false, deductible_percentage: 0, deductible_amount: 0, deduction_rule: null } : taxService.analyze(expenseData);
 
         const result = await db.query(
           `INSERT INTO expenses
             (user_id, transaction_id, date, amount, currency, description, merchant_name,
              category_id, type, is_deductible, deductible_percentage, deductible_amount,
-             deduction_rule, source)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+             deduction_rule, source, is_income)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
            ON CONFLICT (transaction_id) DO NOTHING
            RETURNING id`,
           [
@@ -64,7 +86,7 @@ module.exports = {
             enriched.currency, enriched.description, enriched.merchant_name,
             enriched.category_id, enriched.type, enriched.is_deductible || false,
             enriched.deductible_percentage || 0, enriched.deductible_amount || 0,
-            enriched.deduction_rule, 'csv',
+            enriched.deduction_rule, 'import', isIncome,
           ]
         );
 

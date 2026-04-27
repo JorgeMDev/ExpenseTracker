@@ -73,11 +73,20 @@ export function ExpenseProvider({ children }) {
     return data;
   }, []);
 
+  const parsePDF = useCallback(async (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    const { data } = await api.post('/expenses/parse-pdf', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data.transactions;
+  }, []);
+
   return (
     <ExpenseContext.Provider value={{
       expenses, categories, summary, loading, total,
       fetchExpenses, fetchCategories, createExpense, updateExpense, deleteExpense,
-      fetchSummary, analyzeExpense, importCSV,
+      fetchSummary, analyzeExpense, importCSV, parsePDF,
     }}>
       {children}
     </ExpenseContext.Provider>

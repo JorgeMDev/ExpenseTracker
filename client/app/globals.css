@@ -1,11 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-dark-300 text-slate-100 font-sans antialiased;
+    @apply bg-dark-300 text-slate-100 antialiased;
+    font-family: 'Jost', ui-sans-serif, system-ui;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
   * { @apply border-slate-700; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }

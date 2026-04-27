@@ -17,7 +17,16 @@
       "Bash(git commit -m ' *)",
       "Bash(git remote *)",
       "Bash(git branch *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :5000)",
+      "Bash(findstr LISTENING)",
+      "Bash(taskkill /PID 23108 /F)",
+      "PowerShell(Stop-Process -Id 23108 -Force)",
+      "PowerShell($pid = \\(Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess; if \\($pid\\) { Stop-Process -Id $pid -Force; \"Killed PID $pid\" } else { \"Nothing on port 5000\" })",
+      "PowerShell($p = \\(Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess; if \\($p\\) { Stop-Process -Id $p -Force; \"Killed PID $p\" } else { \"Nothing on port 5000\" })",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(xargs ls *)"
     ]
   }
 }

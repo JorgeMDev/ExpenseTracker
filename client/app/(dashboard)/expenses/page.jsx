@@ -54,8 +54,8 @@ export default function ExpensesPage() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-slate-100">Expenses</h1>
-          <p className="text-slate-400 mt-0.5 text-sm">{total} transactions</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-slate-100 tracking-tight" style={{ fontFamily: "'Cormorant Garamond', sans-serif" }}>Expenses</h1>
+          <p className="text-slate-500 mt-0.5 text-xs tracking-widest uppercase">{total} transactions</p>
         </div>
         <div className="flex items-center gap-2">
           <motion.button
@@ -84,7 +84,7 @@ export default function ExpensesPage() {
             className="btn-secondary flex items-center gap-2 text-sm"
           >
             <ArrowUpTrayIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Import CSV</span>
+            <span className="hidden sm:inline">Import</span>
           </motion.button>
           <motion.button whileTap={{ scale: 0.97 }} onClick={handleAdd} className="btn-primary flex items-center gap-2 text-sm">
             <PlusIcon className="w-4 h-4" />

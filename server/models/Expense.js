@@ -112,12 +112,13 @@ const Expense = {
   async getSummary(userId, dateFrom, dateTo) {
     const { rows } = await db.query(
       `SELECT
-         COUNT(*) as total_count,
-         COALESCE(SUM(amount), 0) as total_amount,
-         COALESCE(SUM(CASE WHEN type = 'business' THEN amount ELSE 0 END), 0) as business_amount,
-         COALESCE(SUM(CASE WHEN type = 'personal' THEN amount ELSE 0 END), 0) as personal_amount,
-         COALESCE(SUM(CASE WHEN is_deductible THEN deductible_amount ELSE 0 END), 0) as total_deductible,
-         COUNT(CASE WHEN is_deductible THEN 1 END) as deductible_count
+         COUNT(*) FILTER (WHERE NOT is_income) as total_count,
+         COALESCE(SUM(amount) FILTER (WHERE NOT is_income), 0) as total_amount,
+         COALESCE(SUM(amount) FILTER (WHERE is_income), 0) as total_income,
+         COALESCE(SUM(CASE WHEN type = 'business' AND NOT is_income THEN amount ELSE 0 END), 0) as business_amount,
+         COALESCE(SUM(CASE WHEN type = 'personal' AND NOT is_income THEN amount ELSE 0 END), 0) as personal_amount,
+         COALESCE(SUM(CASE WHEN is_deductible AND NOT is_income THEN deductible_amount ELSE 0 END), 0) as total_deductible,
+         COUNT(*) FILTER (WHERE is_deductible AND NOT is_income) as deductible_count
        FROM expenses
        WHERE user_id = $1 AND date >= $2 AND date <= $3`,
       [userId, dateFrom, dateTo]
@@ -145,10 +146,11 @@ const Expense = {
     const { rows } = await db.query(
       `SELECT
          TO_CHAR(date_trunc('month', date), 'YYYY-MM') as month,
-         COALESCE(SUM(amount), 0) as total,
-         COALESCE(SUM(CASE WHEN type = 'business' THEN amount ELSE 0 END), 0) as business,
-         COALESCE(SUM(CASE WHEN type = 'personal' THEN amount ELSE 0 END), 0) as personal,
-         COALESCE(SUM(CASE WHEN is_deductible THEN deductible_amount ELSE 0 END), 0) as deductible
+         COALESCE(SUM(amount) FILTER (WHERE NOT is_income), 0) as total,
+         COALESCE(SUM(amount) FILTER (WHERE is_income), 0) as income,
+         COALESCE(SUM(CASE WHEN type = 'business' AND NOT is_income THEN amount ELSE 0 END), 0) as business,
+         COALESCE(SUM(CASE WHEN type = 'personal' AND NOT is_income THEN amount ELSE 0 END), 0) as personal,
+         COALESCE(SUM(CASE WHEN is_deductible AND NOT is_income THEN deductible_amount ELSE 0 END), 0) as deductible
        FROM expenses
        WHERE user_id = $1 AND date >= NOW() - INTERVAL '${months} months'
        GROUP BY date_trunc('month', date)
